@@ -8,16 +8,16 @@ def log(message):
     with open('error.log', 'a') as file:
         file.write(f"{datetime.datetime.now()} - {message}\n")
 
+from .models import *
+
 def create_app():
     app = Flask(__name__)
+
+    app.config.from_object(Config)
 
     CORS(app)
 
     db.init_app(app)
-    migrate.init_app(app)
-
-    app.config.from_object(Config)
+    migrate.init_app(app, db)
 
     return app
-
-from models import User, Paket
