@@ -1,52 +1,54 @@
 from flask import Blueprint, jsonify, request
 from ..models import User
 from ..extensions import db, log, server_error
+from ..middleware import admin_required
 
 kurir_bp = Blueprint('kurir', __name__)
 
 @kurir_bp.route('/', methods=['GET', 'POST'])
-def kurir():
+#@admin_required
+def user():
     try:
         if request.method == 'GET':
-            kurirs = User.query.filter_by(role='kurir').all()
-            kurir_list = [
+            users = User.query.filter_by(role='kurir').all()
+            user_list = [
                 {
-                    'id': kurir.id,
-                    'nama': kurir.nama,
-                    'email': kurir.email
+                    'id': user.id,
+                    'nama': user.nama,
+                    'email': user.email
                 }
-                for kurir in kurirs
+                for user in users
             ]
 
             response_data = {
                 'status': 'success',
-                'data': kurir_list
+                'data': user_list
             }
 
             return jsonify(response_data), 200 
         
         if request.method == 'POST':
             data = request.json
-            new_kurir = User(
+            new_user = User(
                 nama = data['nama'],
                 email = data['email'],
                 role = 'kurir'
             )
-            new_kurir.set_password(data['password'])
+            new_user.set_password(data['password'])
 
-            db.session.add(new_kurir)
+            db.session.add(new_user)
             db.session.commit()
 
-            kurir_data = {
-                'id': new_kurir.id,
-                'nama': new_kurir.nama,
-                'email': new_kurir.email
+            user_data = {
+                'id': new_user.id,
+                'nama': new_user.nama,
+                'email': new_user.email
             }
 
             response_data = {
                 'status': 'success',
                 'message': 'User berhasil ditambahkan.',
-                'data': kurir_data
+                'data': user_data
             }
 
             return jsonify(response_data), 201
