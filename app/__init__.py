@@ -20,7 +20,8 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
 
-    app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(kurir_bp, url_prefix='/user')
+    app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
+    app.register_blueprint(kurir_bp, url_prefix='/api/v1/user')
+    app.register_blueprint(paket_bp, url_prefix='/api/v1/paket')
 
     return app
