@@ -8,3 +8,6 @@ class Config:
 
     GEOCODING_API_KEY = os.getenv('GEOCODING_API_KEY')
     GRAPHHOPPER_API_KEY = os.getenv('GRAPHHOPPER_API_KEY')
+    SERPAPI_API_KEY = os.getenv('SERPAPI_API_KEY')
+
+    DEPOT_COORDS = os.getenv('DEPOT_COORDS')

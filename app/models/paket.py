@@ -14,7 +14,7 @@ class Paket(db.Model):
     kuantitas = db.Column(db.Integer, nullable=False)
     deskripsi = db.Column(db.Text)
     berat = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.Enum('di_gudang', 'berhasil', 'gagal'), nullable=False)
+    status = db.Column(db.Enum('di_gudang', 'dalam_pengiriman', 'berhasil', 'gagal'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
     rute_detail = db.relationship('Rute_Detail', backref='paket', lazy=True, cascade="all, delete-orphan")
