@@ -98,8 +98,8 @@ def format_vrp_solver(kurirs, pakets, depot_coords):
                 "location_id": f"loc_{paket.id}",
                 "lat": paket.latitude,
                 "lon": paket.longitude,
-                "size": paket.berat
-            }
+            },
+            "size": [paket.berat]
         }
         services.append(service)
 
@@ -120,8 +120,12 @@ def format_vrp_solver(kurirs, pakets, depot_coords):
         },
         "objectives": [
             {
-                "type": "min",
-                "value": "transport_time"
+                "type": "min-max",
+                "value": "completion_time"
+            },
+            {
+                "type": "min-max",
+                "value": "activities"
             }
         ],
         "vehicles": vehicles,
@@ -144,7 +148,7 @@ def vrp_solver(kurirs, pakets, depot_coords):
         if not payload.get("services"):
             return {"error": "Tidak ada data paket yang valid untuk diproses."}, 400
         
-        return payload, 200
+        #return payload, 200
 
         headers = {"Content-Type": "application/json"}
         response = requests.post(GRAPHOPPER_VRP_ENDPOINT, json=payload, headers=headers, timeout=30)

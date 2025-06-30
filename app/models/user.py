@@ -8,9 +8,10 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
     role = db.Column(db.Enum('admin', 'kurir'), nullable=False)
+    status = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
-    pengiriman = db.relationship('Rute', backref='user', lazy=True, cascade="all, delete-orphan")
+    rute = db.relationship('Rute', backref='kurir', lazy=True, cascade="all, delete-orphan")
 
     def __repr__(self):
         return f'<User {self.nama}, ID: {self.id}>'

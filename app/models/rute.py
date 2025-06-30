@@ -17,3 +17,9 @@ class Rute(db.Model):
 
     def __repr__(self):
         return f"<ID pengiriman: {self.id}>"
+    
+    def get_estimation_in_complete_time(self):
+        jam = self.estimasi_detik // 3600
+        menit = (self.estimasi_detik % 3600) // 60
+        detik = self.estimasi_detik % 60
+        return f"{jam}j {menit}m {detik}s"
