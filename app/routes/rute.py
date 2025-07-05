@@ -77,6 +77,8 @@ def get_rute_by_id(id):
                         'resi': detail.paket.resi,
                         'nama_penerima': detail.paket.nama_penerima,
                         'alamat': detail.paket.alamat,
+                        'latitude': detail.paket.latitude,
+                        'longitude': detail.paket.longitude,
                         'status': detail.paket.status
                     }
                 }
