@@ -3,14 +3,14 @@ from ..models import User
 from ..extensions import db, log, server_error
 from ..middleware import admin_required
 
-kurir_bp = Blueprint('kurir', __name__)
+admin_bp = Blueprint('admin', __name__)
 
-@kurir_bp.route('/', methods=['GET', 'POST'])
+@admin_bp.route('/', methods=['GET', 'POST'])
 #@admin_required
-def user():
+def admin():
     try:
         if request.method == 'GET':
-            users = User.query.filter_by(role='kurir').all()
+            users = User.query.filter_by(role='admin').all()
             user_list = [
                 {
                     'id': user.id,
@@ -32,7 +32,7 @@ def user():
             new_user = User(
                 nama = data['nama'],
                 email = data['email'],
-                role = 'kurir'
+                role = 'admin'
             )
             new_user.set_password(data['password'])
 
@@ -61,8 +61,8 @@ def user():
 
         return jsonify(server_error), 500
     
-@kurir_bp.route('/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
-def user_detail(user_id):
+@admin_bp.route('/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
+def admin_detail(user_id):
     try:
         user = User.query.get_or_404(user_id)
 
@@ -72,7 +72,6 @@ def user_detail(user_id):
                 'nama': user.nama,
                 'email': user.email,
                 'role': user.role,
-                'status': user.status
             }
             return jsonify({'status': 'success', 'data': user_data}), 200
 
@@ -92,39 +91,4 @@ def user_detail(user_id):
 
     except Exception as e:
         log(str(e))
-        return jsonify(server_error), 500
-
-@kurir_bp.route('/bulk-delete', methods=['POST'])
-def mahasiswa_bulk_delete():
-    try:
-        delete_id = request.json.get('ids', [])
-    
-        if not isinstance(delete_id, list) or not delete_id:
-            return jsonify({
-                'status': 'error',
-                'message': 'Data tidak ditemukan. Tolong sediakan array data ID.'
-            }), 400
-            
-        delete_users = User.query.filter(User.id.in_(delete_id)).all()
-        if not delete_users:
-            return jsonify({
-                'status': 'error',
-                'message': 'Kurir dengan ID yang disediakan tidak ditemukan.'
-            }), 404
-            
-        for user in delete_users:
-            db.session.delete(user)
-        
-        db.session.commit()
-        
-        return jsonify({
-            'status': 'success',
-            'message': 'Kurir telah berhasil dihapus.',
-            'idHapus': delete_id
-        }), 200
-    
-    except Exception as e:
-        log(str(e))
-        db.session.rollback()
-        
         return jsonify(server_error), 500

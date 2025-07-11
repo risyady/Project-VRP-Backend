@@ -22,6 +22,7 @@ def create_app():
 
     app.register_blueprint(auth_bp, url_prefix='/api/v1/auth')
     app.register_blueprint(kurir_bp, url_prefix='/api/v1/user')
+    app.register_blueprint(admin_bp, url_prefix='/api/v1/admin')
     app.register_blueprint(paket_bp, url_prefix='/api/v1/paket')
     app.register_blueprint(rute_bp, url_prefix='/api/v1/rute')
 

@@ -17,7 +17,7 @@ class Paket(db.Model):
     status = db.Column(db.Enum('di_gudang', 'dalam_pengiriman', 'berhasil', 'gagal'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
-    rute_detail = db.relationship('Rute_Detail', backref='paket', lazy=True, cascade="all, delete-orphan")
+    rute_detail = db.relationship('Rute_Detail', backref='paket', lazy=True, cascade="save-update, merge")
 
     def __repr__(self):
         return f"<No. Resi {self.resi}>"

@@ -7,11 +7,11 @@ class User(db.Model):
     nama = db.Column(db.String(150), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     email = db.Column(db.String(150), unique=True, nullable=False)
-    role = db.Column(db.Enum('admin', 'kurir'), nullable=False)
+    role = db.Column(db.Enum('admin', 'kurir', 'superadmin'), nullable=False)
     status = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, server_default=db.func.now())
 
-    rute = db.relationship('Rute', backref='kurir', lazy=True, cascade="all, delete-orphan")
+    rute = db.relationship('Rute', backref='kurir', lazy=True, cascade="save-update, merge")
 
     def __repr__(self):
         return f'<User {self.nama}, ID: {self.id}>'

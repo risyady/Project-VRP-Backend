@@ -36,3 +36,15 @@ def kurir_required(view):
 
         return view(**kwargs)
     return login_required(wrapped_view)
+
+def superadmin_required(view):
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if session.get('role') != 'superadmin':
+            return jsonify({
+                'status': 'error',
+                'message': 'Akses ditolak. Anda bukan superadmin.'
+            }), 403
+
+        return view(**kwargs)
+    return login_required(wrapped_view)
