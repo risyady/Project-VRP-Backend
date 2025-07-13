@@ -1,3 +1,4 @@
+from flask_jwt_extended import JWTManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask import current_app
@@ -6,6 +7,9 @@ import requests
 
 db = SQLAlchemy()
 migrate = Migrate()
+jwt = JWTManager()
+
+log = lambda message: print(message, flush=True)
 
 server_error = {
     'status': 'error',
@@ -13,34 +17,6 @@ server_error = {
 }
 
 def get_coords(address):
-    # GraphHopper GeoCoding
-    """ api_key = current_app.config.get('GRAPHHOPPER_API_KEY')
-    if not api_key:
-        log("Error: GRAPHHOPPER_API_KEY tidak ditemukan di konfigurasi.")
-        return None, None
-    
-    base_url = "https://graphhopper.com/api/1/geocode"
-    params = {
-        'q': address,
-        'key': api_key
-    }
-
-    try:
-        response = requests.get(base_url, params=params)
-        response.raise_for_status()
-        data = response.json()
-
-        if data and data.get('hits'):
-            location = data['hits'][0]['point']
-            log(f"GraphHopper menemukan koordinat: {location.get('lat')}, {location.get('lng')}")
-            return location.get('lat'), location.get('lng')
-        else:
-            log(f"GraphHopper tidak dapat menemukan koordinat untuk alamat: {address}")
-            return None, None
-    except requests.exceptions.RequestException as e:
-        log(f"Error saat menghubungi GraphHopper API: {e}")
-        return None, None """
-    
     api_key = current_app.config.get('SERPAPI_API_KEY')
     if not api_key:
         log("Error: SERPAPI_API_KEY tidak ditemukan di konfigurasi.")
@@ -52,8 +28,7 @@ def get_coords(address):
         'q': address,
         'hl': 'id',
         'gl': 'id',
-        'api_key': api_key,
-        'async': 'true'
+        'api_key': api_key
     }
 
     try:

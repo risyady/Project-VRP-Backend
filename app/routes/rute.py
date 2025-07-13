@@ -1,11 +1,15 @@
 from flask import Blueprint, request, jsonify, current_app
+from flask_jwt_extended import get_jwt_identity
 from ..extensions import db, server_error, log, vrp_solver
 from ..models import Rute, Rute_Detail, Paket, User
 from sqlalchemy.orm import joinedload
+from ..middleware import role_required
+import datetime
 
 rute_bp = Blueprint('rute', __name__)
 
 @rute_bp.route('/', methods=['GET'])
+@role_required('admin', 'superadmin')
 def get_all_rute():
     try:
         rutes = Rute.query.options(
@@ -52,6 +56,7 @@ def get_all_rute():
         return jsonify(server_error), 500
 
 @rute_bp.route('/<int:id>', methods=['GET'])
+@role_required('admin', 'superadmin')
 def get_rute_by_id(id):
     try:
         rute = Rute.query.options(
@@ -91,6 +96,7 @@ def get_rute_by_id(id):
         return jsonify(server_error), 500
 
 @rute_bp.route('/optimasi', methods=['GET', 'POST'])
+@role_required('admin')
 def create_rute():
     try:
         if request.method == 'GET':
@@ -226,4 +232,93 @@ def create_rute():
     except Exception as e:
         db.session.rollback()
         log(f"Error di create_rute: {str(e)}")
+        return jsonify(server_error), 500
+
+@rute_bp.route('/aktif', methods=['GET'])
+@role_required('kurir')
+def get_rute_aktif_kurir():
+    try:
+        kurir_id = get_jwt_identity()
+        rute = Rute.query.options(
+            joinedload(Rute.kurir),
+            joinedload(Rute.rute_detail).joinedload(Rute_Detail.paket)
+        ).filter(Rute.kurir_id == kurir_id, Rute.status == False).first()
+
+        if not rute:
+            return jsonify({'status': 'success', 'message': 'Tidak ada rute aktif untuk kurir ini.', 'data': None}), 200
+
+        rute_data = {
+            'id': rute.id,
+            'kurir': rute.kurir.nama,
+            'created_at': rute.created_at.isoformat(),
+            'estimasi': rute.get_estimation_in_complete_time(),
+            'jarak': rute.jarak_meter,
+            'status': rute.status,
+            'polyline': rute.polyline,
+            'rute_detail': [
+                {
+                    'id': detail.id,
+                    'urutan': detail.urutan,
+                    'waktu_tiba': detail.waktu_tiba.isoformat() if detail.waktu_tiba else None,
+                    'paket': {
+                        'id': detail.paket.id,
+                        'resi': detail.paket.resi,
+                        'nama_penerima': detail.paket.nama_penerima,
+                        'alamat': detail.paket.alamat,
+                        'latitude': detail.paket.latitude,
+                        'longitude': detail.paket.longitude,
+                        'status': detail.paket.status
+                    }
+                }
+                for detail in sorted(rute.rute_detail, key=lambda d: d.urutan)
+            ]
+        }
+        return jsonify({'status': 'success', 'data': rute_data}), 200
+    except Exception as e:
+        log(f"Error di get_rute_aktif_kurir: {str(e)}")
+        return jsonify(server_error), 500
+    
+@rute_bp.route('/<int:id>/selesai', methods=['PUT'])
+@role_required('kurir')
+def rute_selesai(id):
+    try:
+        kurir_id = get_jwt_identity()
+        rute = Rute.query.filter_by(id=id, kurir_id=kurir_id, status=False).first_or_404(description=f"Rute dengan ID {id} tidak ditemukan atau tidak aktif.")
+
+        rute.status = True
+        db.session.commit()
+
+        User.query.filter_by(id=kurir_id).update({'status': True}, synchronize_session=False)
+        db.session.commit()
+
+        return jsonify({'status': 'success', 'message': 'Rute berhasil diselesaikan.'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        log(f"Error di rute_selesai: {str(e)}")
+        return jsonify(server_error), 500
+
+@rute_bp.route('/<int:id>/paket-kirim', methods=['PUT'])
+@role_required('kurir')
+def paket_kirim(id):
+    try:
+        rute_detail = Rute_Detail.query.filter_by(paket_id=id).first_or_404(description=f"Detail rute dengan ID {id} tidak ditemukan.")
+
+        if not rute_detail:
+            return jsonify({'status': 'error', 'message': 'Detail rute untuk paket ini tidak ditemukan atau Anda tidak memiliki akses.'}), 404
+
+        paket = Paket.query.filter_by(id=id, status='dalam_pengiriman').first()
+        if not paket:
+            return jsonify({'status': 'error', 'message': 'Paket tidak ditemukan atau statusnya bukan "dalam_pengiriman".'}), 404
+
+        rute_detail.waktu_tiba = datetime.datetime.now()
+        paket.status = 'berhasil'
+
+        db.session.commit()
+
+        return jsonify({'status': 'success', 'message': f'Status paket {paket.resi} berhasil diperbarui.'}), 200
+
+    except Exception as e:
+        db.session.rollback()
+        log(f"Error di paket_kirim: {str(e)}")
         return jsonify(server_error), 500

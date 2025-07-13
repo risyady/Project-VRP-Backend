@@ -1,12 +1,12 @@
 from flask import Blueprint, jsonify, request
 from ..models import User
 from ..extensions import db, log, server_error
-from ..middleware import admin_required
+from ..middleware import role_required
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/', methods=['GET', 'POST'])
-#@admin_required
+@role_required('superadmin')
 def admin():
     try:
         if request.method == 'GET':
@@ -47,7 +47,7 @@ def admin():
 
             response_data = {
                 'status': 'success',
-                'message': 'User berhasil ditambahkan.',
+                'message': 'Admin berhasil ditambahkan.',
                 'data': user_data
             }
 
@@ -61,19 +61,11 @@ def admin():
 
         return jsonify(server_error), 500
     
-@admin_bp.route('/<int:user_id>', methods=['GET', 'PUT', 'DELETE'])
+@admin_bp.route('/<int:user_id>', methods=['PUT', 'DELETE'])
+@role_required('superadmin')
 def admin_detail(user_id):
     try:
         user = User.query.get_or_404(user_id)
-
-        if request.method == 'GET':
-            user_data = {
-                'id': user.id,
-                'nama': user.nama,
-                'email': user.email,
-                'role': user.role,
-            }
-            return jsonify({'status': 'success', 'data': user_data}), 200
 
         if request.method == 'PUT':
             data = request.json

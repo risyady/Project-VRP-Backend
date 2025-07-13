@@ -1,7 +1,7 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 from ..extensions import db, log, server_error
 from ..models import User
-from ..middleware import login_required
+from flask_jwt_extended import create_access_token, jwt_required
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -26,18 +26,20 @@ def login():
                 'message': 'Email atau password salah.'
             }), 401
         
-        session.clear()
-        session['user_id'] = user.id
-        session['nama'] = user.nama
-        session['role'] = user.role
-        
+        additional_claims = {'role': user.role, 'nama': user.nama}
+        access_token = create_access_token(identity=str(user.id), additional_claims=additional_claims)
+
         return jsonify({
             'status': 'success',
             'message': 'Login berhasil.',
             'data': {
-                'user_id': user.id,
-                'nama': user.nama,
-                'role': user.role
+                'access_token': access_token,
+                'user': {
+                    'id': user.id,
+                    'nama': user.nama,
+                    'email': user.email,
+                    'role': user.role
+                }
             }
         }), 200
         
@@ -46,9 +48,8 @@ def login():
         return jsonify(server_error), 500
     
 @auth_bp.route('/logout', methods=['POST'])
-@login_required
+@jwt_required()
 def logout():
-    session.clear()
     return jsonify({
         'status': 'success', 
         'message': 'Anda telah berhasil logout.'
