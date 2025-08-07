@@ -1,5 +1,11 @@
 # 🚀 VRP Solver Backend Project
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/Flask-1a1a1a?style=for-the-badge&logo=flask&logoColor=white" alt="Flask">
+  <img src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL">
+</p>
+
 This is a backend API for the **Vehicle Routing Problem (VRP) Solver** application. This API is responsible for handling business logic, data management, user authentication, and integration with external services for geocoding and route optimization.
 
 ## 🔑 Key Features
