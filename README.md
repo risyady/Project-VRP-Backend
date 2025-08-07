@@ -58,15 +58,15 @@ Follow these steps to run this project in your local environment.
     flask run
     ```
 
-## 💻 Variabel Lingkungan (.env)
+## 💻 Environment Variables (.env)
 
-Berikut adalah penjelasan untuk setiap variabel di dalam file `.env`:
+Here is an explanation for each variable in the `.env` file:
 
-* `SECRET_KEY`: Kunci rahasia untuk keamanan aplikasi (misalnya untuk sesi).
-* `JWT_SECRET_KEY`: Kunci rahasia khusus untuk menandatangani token JWT.
-* `GRAPHHOPPER_API_KEY`: API Key untuk layanan GraphHopper.
-* `SERPAPI_API_KEY`: API Key untuk layanan SerpApi.
-* `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_HOST`: Kredensial dan informasi koneksi ke database MySQL.
-* `DEPOT_COORDS`: Koordinat (latitude,longitude) dari depot atau titik awal.
+* `SECRET_KEY`: Secret key for application security (e.g., for sessions).
+* `JWT_SECRET_KEY`: Secret key specifically for signing JWT tokens.
+* `GRAPHHOPPER_API_KEY`: API Key for the GraphHopper service.
+* `SERPAPI_API_KEY`: API key for SerpApi services.
+* `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_HOST`: Credentials and connection information for the MySQL database.
+* `DEPOT_COORDS`: Coordinates (latitude, longitude) of the depot or starting point.
 
 ---
